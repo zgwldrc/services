@@ -1,0 +1,57 @@
+version: "2"
+services:
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+    - 80:80
+    volumes:
+    - ./conf/nginx/:/etc/nginx/conf.d/
+
+  phpldap:
+    build: ./phpldap
+    environment:
+    - PHPLDAPADMIN_HTTPS=false
+    
+  openldap:
+    build: ./openldap
+    environment:
+    - DOMAIN=xiayu.com
+    - ROOT_PW=xiayu123
+    volumes:
+    - ./data/openldap:/var/lib/ldap
+    - ./conf/openldap:/etc/ldap/slapd.d
+    ports:
+    - 389:389
+    
+  mysql:
+    image: mysql:5.7
+    restart: always
+    ports:
+    - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "Hó±©íK¦ôm7÷çgkd¤"
+    volumes:
+    - ./data/mysql/:/var/lib/mysql/
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    restart: always
+    volumes:
+      - ./data/jenkins_home/:/var/jenkins_home/
+
+  gitlab:
+    image: 'gitlab/gitlab-ce:latest'
+    privileged: true
+    restart: always
+    hostname: 'gitlab.xiayu'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.xiayu'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+    ports:
+      - '2224:22'
+    volumes:
+      - './config/gitlab/:/etc/gitlab'
+      - './log/gitlab/:/var/log/gitlab'
+      - './data/gitlab/:/var/opt/gitlab'

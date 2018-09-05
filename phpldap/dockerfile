@@ -1,0 +1,2 @@
+FROM osixia/phpldapadmin
+ADD ./config.php /container/service/phpldapadmin/assets/config/config.php
